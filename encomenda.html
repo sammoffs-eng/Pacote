@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Controle de Encomendas (Limpeza Mensal)</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#f4f4f4;
+    padding:20px;
+}
+
+.container{
+    max-width:1100px;
+    margin:auto;
+}
+
+.topo{
+    background:white;
+    padding:20px;
+    border-radius:20px;
+    text-align:center;
+    margin-bottom:20px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+h1{
+    margin-bottom:10px;
+    color:#333;
+}
+
+p{
+    color:#666;
+}
+
+.camera-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 15px auto;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    display: none;
+}
+
+#video {
+    width: 100%;
+    display: block;
+    transform: scaleX(1);
+}
+
+#canvas {
+    display: none;
+}
+
+.botao{
+    display:inline-block;
+    margin-top:15px;
+    background:#007bff;
+    color:white;
+    padding:14px 20px;
+    border-radius:12px;
+    cursor:pointer;
+    transition:0.3s;
+    border: none;
+    font-size: 16px;
+}
+
+.botao:hover{
+    background:#0056b3;
+}
+
+.galeria{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:white;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    padding-bottom:15px;
+}
+
+.card img{
+    width:100%;
+    height:220px;
+    object-fit:cover;
+}
+
+.campos-cadastro {
+    width: 90%;
+    margin: 10px auto 0 auto;
+    display: flex;
+    gap: 10px;
+}
+
+.campos-cadastro input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.campo-retirada {
+    width: 90%;
+    margin: 10px auto;
+}
+
+.campo-retirada input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+textarea{
+    width:90%;
+    margin:10px auto;
+    display:block;
+    padding:12px;
+    border-radius:10px;
+    border: 1px solid #ccc;
+    resize:none;
+    min-height:70px;
+}
+
+button{
+    width:90%;
+    margin:5px auto;
+    display:block;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    color:white;
+    font-size:15px;
+    cursor:pointer;
+}
+
+.btn-salvar { background:#007bff; }
+.btn-entregar { background:#28a745; }
+.btn-excluir { background:#dc3545; }
+.btn-refazer { background:#6c757d; }
+
+button:hover{
+    opacity:0.9;
+}
+
+.status-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.status-pendente { background: #ffeeba; color: #856404; }
+.status-entregue { background: #d4edda; color: #155724; }
+
+.cabecalho-painel {
+    margin-top: 40px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.titulo-secao {
+    color:#333;
+    margin: 0;
+}
+
+/* Container de ferramentas (Busca e Limpeza Mensal) */
+.ferramentas-painel {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+    max-width: 700px;
+    justify-content: flex-end;
+}
+
+.busca-container {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 5px 15px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    border: 1px solid #e0e0e0;
+    flex: 1;
+    min-width: 240px;
+}
+
+.busca-container input {
+    border: none;
+    outline: none;
+    padding: 10px 5px;
+    width: 100%;
+    font-size: 15px;
+}
+
+/* Área do botão de apagar por mês */
+.limpeza-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: white;
+    padding: 8px 12px;
+    border-radius: 15px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.limpeza-container input[type="month"] {
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    outline: none;
+}
+
+.limpeza-container button {
+    width: auto;
+    margin: 0;
+    padding: 10px 14px;
+    background: #dc3545;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.encomendas-lista{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:20px;
+}
+
+.item-encomenda{
+    background:white;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    padding-bottom:15px;
+}
+
+.item-encomenda img{
+    width:100%;
+    height:220px;
+    object-fit:cover;
+}
+
+.info{
+    padding:15px;
+    font-size:14px;
+}
+
+.info strong { color: #444; }
+
+.divider {
+    border-top: 1px dashed #ccc;
+    margin: 10px 0;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="topo">
+        <h1>Entrada de Novas Encomendas</h1>
+        <p>Ative a câmera e registre a chegada da encomenda</p>
+        
+        <button id="btn-ligar-camera" class="botao">Abrir Câmera Traseira</button>
+        
+        <div class="camera-container" id="cameraBox">
+            <video id="video" autoplay playsinline></video>
+            <button id="btn-capturar" class="btn-salvar" style="width:100%; border-radius:0; padding:15px;">📸 Bater Foto</button>
+        </div>
+        
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="galeria" id="galeria"></div>
+
+    <div class="cabecalho-painel">
+        <h2 class="titulo-secao">📦 Painel de Encomendas</h2>
+        
+        <div class="ferramentas-painel">
+            <div class="busca-container">
+                <span style="font-size: 18px; margin-right: 8px;">🔍</span>
+                <input type="text" id="buscaApe" placeholder="Buscar por Ap / Bloco...">
+            </div>
+
+            <div class="limpeza-container">
+                <input type="month" id="selecaoMes">
+                <button id="btnLimparMes" title="Apagar todas as encomendas do mês escolhido">🗑️ Limpar Mês</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="encomendas-lista" id="listaEncomendas"></div>
+
+</div>
+
+<script type="module">
+import { get, set } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
+
+const btnLigarCamera = document.getElementById('btn-ligar-camera');
+const btnCapturar = document.getElementById('btn-capturar');
+const cameraBox = document.getElementById('cameraBox');
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const galeria = document.getElementById('galeria');
+const listaEncomendas = document.getElementById('listaEncomendas');
+const buscaApe = document.getElementById('buscaApe');
+const selecaoMes = document.getElementById('selecaoMes');
+const btnLimparMes = document.getElementById('btnLimparMes');
+
+let streamLocal = null;
+
+// Configurar o input de mês para exibir o mês atual por padrão ao carregar
+const dataHoje = new Date();
+const anoAtual = dataHoje.getFullYear();
+const mesAtual = String(dataHoje.getMonth() + 1).padStart(2, '0');
+selecaoMes.value = `${anoAtual}-${mesAtual}`;
+
+buscaApe.addEventListener('input', carregarEncomendas);
+btnLimparMes.addEventListener('click', limparMesInteiro);
+
+async function ligarCamera() {
+    try {
+        const constraints = { video: { facingMode: { exact: "environment" } } };
+        try {
+            streamLocal = await navigator.mediaDevices.getUserMedia(constraints);
+        } catch(e) {
+            streamLocal = await navigator.mediaDevices.getUserMedia({ video: true });
+        }
+        video.srcObject = streamLocal;
+        cameraBox.style.display = 'block';
+        btnLigarCamera.style.display = 'none';
+    } catch (err) {
+        alert('Erro ao acessar a câmera.');
+    }
+}
+
+btnLigarCamera.addEventListener('click', ligarCamera);
+
+btnCapturar.addEventListener('click', () => {
+    const context = canvas.getContext('2d');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrlFoto = canvas.toDataURL('image/jpeg');
+
+    if (streamLocal) {
+        streamLocal.getTracks().forEach(track => track.stop());
+    }
+    cameraBox.style.display = 'none';
+
+    galeria.innerHTML = '';
+    const card = document.createElement('div');
+    card.classList.add('card');
+
+    card.innerHTML = `
+        <img src="${dataUrlFoto}">
+        <button class="btn-refazer">🔄 Tirar Outra Foto</button>
+        <div class="campos-cadastro">
+            <input type="text" class="ape-chegada" placeholder="Ap / Bloco Destino">
+        </div>
+        <textarea class="nome-encomenda" placeholder="Nome/Descrição da encomenda..."></textarea>
+        <button class="btn-salvar">Registrar Entrada</button>
+    `;
+
+    const botaoSalvar = card.querySelector('.btn-salvar');
+    const botaoRefazer = card.querySelector('.btn-refazer');
+    const inputApe = card.querySelector('.ape-chegada');
+    const textareaNome = card.querySelector('.nome-encomenda');
+
+    botaoRefazer.addEventListener('click', () => {
+        card.remove();
+        ligarCamera();
+    });
+
+    botaoSalvar.addEventListener('click', async ()=>{
+        if(inputApe.value.trim() === '' || textareaNome.value.trim() === ''){
+            alert('Por favor, preencha o Apartamento e o Nome/Descrição.');
+            return;
+        }
+
+        const agora = new Date();
+        const novaEncomenda = {
+            id: Date.now() + Math.random(),
+            imagem: dataUrlFoto,
+            apartamento: inputApe.value,
+            descricao: textareaNome.value,
+            chegadaData: agora.toLocaleDateString(), // Salva no padrão local (ex: "27/05/2026")
+            chegadaHora: agora.toLocaleTimeString(),
+            // Guardamos também o ano e mês de forma isolada para facilitar a exclusão em lote estruturada
+            anoMesRegistro: `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}`,
+            status: 'Pendente',
+            quemRetirou: '',
+            entregaData: '',
+            entregaHora: ''
+        };
+
+        let encomendas = await get('encomendas') || [];
+        encomendas.unshift(novaEncomenda);
+        await set('encomendas', encomendas);
+
+        card.remove();
+        btnLigarCamera.style.display = 'inline-block';
+        carregarEncomendas();
+        alert('Encomenda registrada com sucesso!');
+    });
+
+    galeria.appendChild(card);
+});
+
+async function carregarEncomendas(){
+    listaEncomendas.innerHTML = '';
+    let encomendas = await get('encomendas') || [];
+    const termoBusca = buscaApe.value.trim().toLowerCase();
+
+    const encomendasFiltradas = encomendas.filter(item => {
+        return item.apartamento.toLowerCase().includes(termoBusca);
+    });
+
+    if(encomendasFiltradas.length === 0) {
+        listaEncomendas.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #999;">Nenhuma encomenda encontrada.</p>';
+        return;
+    }
+
+    encomendasFiltradas.forEach((item)=>{
+        const div = document.createElement('div');
+        div.classList.add('item-encomenda');
+        const isPendente = item.status === 'Pendente';
+
+        div.innerHTML = `
+            <img src="${item.imagem}">
+            <div class="info">
+                <span class="status-tag ${isPendente ? 'status-pendente' : 'status-entregue'}">
+                    ${isPendente ? '⏳ Aguardando Retirada' : '✅ Entregue'}
+                </span><br>
+                
+                <strong>Apartamento Destino:</strong> ${item.apartamento}<br>
+                <strong>Encomenda:</strong> ${item.descricao}<br>
+                <strong>Recebido na Portaria:</strong> ${item.chegadaData} às ${item.chegadaHora}
+                
+                ${isPendente ? `
+                    <div class="divider"></div>
+                    <p style="margin-bottom:8px; font-weight:bold; color:#28a745;">Dar Baixa / Entregar:</p>
+                    <div class="campo-retirada">
+                        <input type="text" class="quem-retirou" placeholder="Nome de quem retirou">
+                    </div>
+                    <button class="btn-entregar">Confirmar Entrega</button>
+                ` : `
+                    <div class="divider"></div>
+                    <strong>Retirado por:</strong> ${item.quemRetirou}<br>
+                    <strong>Entregue em:</strong> ${item.entregaData} às ${item.entregaHora}
+                `}
+                <button class="btn-excluir">Excluir Registro</button>
+            </div>
+        `;
+
+        if(isPendente) {
+            const btnEntregar = div.querySelector('.btn-entregar');
+            const inputQuemRetirou = div.querySelector('.quem-retirou');
+
+            btnEntregar.addEventListener('click', async () => {
+                if(inputQuemRetirou.value.trim() === '') {
+                    alert('Por favor, digite o nome do morador.');
+                    return;
+                }
+
+                const agora = new Date();
+                let todasEncomendas = await get('encomendas') || [];
+                const indexOriginal = todasEncomendas.findIndex(enc => enc.id === item.id);
+
+                if(indexOriginal !== -1) {
+                    todasEncomendas[indexOriginal].status = 'Entregue';
+                    todasEncomendas[indexOriginal].quemRetirou = inputQuemRetirou.value;
+                    todasEncomendas[indexOriginal].entregaData = agora.toLocaleDateString();
+                    todasEncomendas[indexOriginal].entregaHora = agora.toLocaleTimeString();
+
+                    await set('encomendas', todasEncomendas);
+                    carregarEncomendas();
+                    alert('Entrega registrada com sucesso!');
+                }
+            });
+        }
+
+        const btnExcluir = div.querySelector('.btn-excluir');
+        btnExcluir.addEventListener('click', () => {
+            excluirEncomenda(item.id);
+        });
+
+        listaEncomendas.appendChild(div);
+    });
+}
+
+async function excluirEncomenda(idItem){
+    const senhaDigitada = prompt('Digite a senha para autorizar a exclusão:');
+    const senhaCorreta = '1234'; 
+
+    if (senhaDigitada === null) return; 
+    if (senhaDigitada !== senhaCorreta) {
+        alert('Senha incorreta!');
+        return;
+    }
+
+    let todasEncomendas = await get('encomendas') || [];
+    const indexOriginal = todasEncomendas.findIndex(enc => enc.id === idItem);
+
+    if(indexOriginal !== -1) {
+        todasEncomendas.splice(indexOriginal, 1);
+        await set('encomendas', todasEncomendas);
+        carregarEncomendas();
+        alert('Registro removido do sistema.');
+    }
+}
+
+// NOVO: FUNÇÃO PARA APAGAR OS REGISTROS DE UM MÊS INTEIRO
+async function limparMesInteiro() {
+    const mesEscolhido = selecaoMes.value; // Formato retornado: "ANO-MES" (Ex: "2026-05")
+    
+    if(!mesEscolhido) {
+        alert('Por favor, selecione um mês válido.');
+        return;
+    }
+
+    // 1ª Camada de Segurança: Senha Mestre
+    const senhaDigitada = prompt(`Digite a senha para APAGAR TODOS os registros do mês (${mesEscolhido}):`);
+    const senhaCorreta = '1234';
+
+    if (senhaDigitada === null) return; // Cancelou
+    if (senhaDigitada !== senhaCorreta) {
+        alert('Senha incorreta! Operação cancelada.');
+        return;
+    }
+
+    // 2ª Camada de Segurança: Confirmação Verbal do navegador
+    const certeza = confirm(`ATENÇÃO!! Você está prestes a apagar permanentemente TODOS os registros cadastrados no mês ${mesEscolhido}.\n\nTem certeza absoluta de que quer continuar?`);
+    if (!certeza) return;
+
+    let todasEncomendas = await get('encomendas') || [];
+    
+    // Filtramos a lista mantendo no banco APENAS as encomendas que NÃO pertencem ao mês escolhido
+    const encomendasMantidas = todasEncomendas.filter(item => {
+        // Se o item antigo não tiver a nova propriedade 'anoMesRegistro', deduzimos o mês a partir da string 'chegadaData'
+        if (!item.anoMesRegistro && item.chegadaData) {
+            const partes = item.chegadaData.split('/'); // ["27", "05", "2026"]
+            if(partes.length === 3) {
+                item.anoMesRegistro = `${partes[2]}-${partes[1]}`;
+            }
+        }
+        return item.anoMesRegistro !== mesEscolhido;
+    });
+
+    const totalApagados = todasEncomendas.length - encomendasMantidas.length;
+
+    // Atualiza o banco de dados local com os sobreviventes
+    await set('encomendas', encomendasMantidas);
+    carregarEncomendas();
+
+    alert(`Limpeza concluída! Foram apagados ${totalApagados} registros do mês ${mesEscolhido}.`);
+}
+
+carregarEncomendas();
+</script>
+
+</body>
+</html>
